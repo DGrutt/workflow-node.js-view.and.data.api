@@ -59,6 +59,8 @@ Viewing.Extension.Workshop = function (viewer, options) {
       'WorkshopPanelId',
       'Workshop Panel');
 
+    _self.interval = 0;
+
     console.log('Viewing.Extension.Workshop loaded');
 
     return true;
@@ -92,8 +94,13 @@ Viewing.Extension.Workshop = function (viewer, options) {
 
         _viewer.fitToView(dbId);
         _viewer.isolateById(dbId);
+
+        _self.startRotation();
+
       }
       else {
+
+        clearInterval(_self.interval);
 
         _viewer.isolateById([]);
         _viewer.fitToView();
@@ -103,6 +110,46 @@ Viewing.Extension.Workshop = function (viewer, options) {
     
 
   }
+
+
+  /////////////////////////////////////////////////////////////////
+  // rotates camera around axis with center origin
+  //
+  /////////////////////////////////////////////////////////////////
+  _self.rotateCamera = function(angle, axis) {
+    var pos = _viewer.navigation.getPosition();
+
+    var position = new THREE.Vector3(
+      pos.x, pos.y, pos.z);
+    var rAxis = new THREE.Vector3(
+      axis.x, axis.y, axis.z);
+
+    var matrix = new THREE.Matrix4().makeRotationAxis(
+      rAxis,
+      angle);
+
+    position.applyMatrix4(matrix);
+
+    _viewer.navigation.setPosition(position);
+
+  };
+
+  /////////////////////////////////////////////////////////////////
+  // start rotation effect
+  //
+  /////////////////////////////////////////////////////////////////
+
+  _self.startRotation = function() {
+    clearInterval(_self.interval);
+
+    // sets small delay before starting rotation
+
+    setTimeout(function() {
+      _self.interval = setInterval(function () {
+        _self.rotateCamera(0.05, {x:0, y:1, z:0});
+      }, 100)}, 500);
+
+  };
 
   /////////////////////////////////////////////////////////////////
   // unload callback: invoked when viewer.unloadExtension is called
