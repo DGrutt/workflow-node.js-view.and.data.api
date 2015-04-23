@@ -19,6 +19,29 @@ Viewing.Extension.Workshop = function (viewer, options) {
   var _viewer = viewer;
 
   /////////////////////////////////////////////////////////////////
+  // creates panel and sets up inheritance
+  //
+  /////////////////////////////////////////////////////////////////
+
+  Viewing.Extension.Workshop.WorkshopPanel = function(
+    parentContainer,
+    id,
+    title,
+    options)
+  {
+    Autodesk.Viewing.UI.PropertyPanel.call(
+      this,
+      parentContainer,
+      id, title);
+  };
+
+  Viewing.Extension.Workshop.WorkshopPanel.prototype = Object.create(
+    Autodesk.Viewing.UI.PropertyPanel.prototype);
+
+  Viewing.Extension.Workshop.WorkshopPanel.prototype.constructor =
+    Viewing.Extension.Workshop.WorkshopPanel;
+
+  /////////////////////////////////////////////////////////////////
   // load callback: invoked when viewer.loadExtension is called
   //
   /////////////////////////////////////////////////////////////////
@@ -30,6 +53,11 @@ Viewing.Extension.Workshop = function (viewer, options) {
     Autodesk.Viewing.SELECTION_CHANGED_EVENT,
     _self.onSelectionChanged);
 
+
+    _self.panel = new Viewing.Extension.Workshop.WorkshopPanel (
+      _viewer.container,
+      'WorkshopPanelId',
+      'Workshop Panel');
 
     console.log('Viewing.Extension.Workshop loaded');
 
@@ -45,18 +73,35 @@ Viewing.Extension.Workshop = function (viewer, options) {
 
     // event is triggered also when component is unselected
 
-    // in that case event.dbIdArray is an empty array
-    if(event.dbIdArray.length) {
+    function propertiesHandler(result) {
 
-      var dbId = event.dbIdArray[0];
+        if (result.properties) {
+          _self.panel.setProperties(
+            result.properties);
+          _self.panel.setVisible(true);
+        }
+      }
 
-      //do stuff with selected component
-   }
-    else {
 
+      if(event.dbIdArray.length) {
+        var dbId = event.dbIdArray[0];
 
-      //all components unselected
-    }
+        _viewer.getProperties(
+          dbId,
+          propertiesHandler);
+
+        _viewer.fitToView(dbId);
+        _viewer.isolateById(dbId);
+      }
+      else {
+
+        _viewer.isolateById([]);
+        _viewer.fitToView();
+        _self.panel.setVisible(false);
+      }
+
+    
+
   }
 
   /////////////////////////////////////////////////////////////////
@@ -65,6 +110,11 @@ Viewing.Extension.Workshop = function (viewer, options) {
   /////////////////////////////////////////////////////////////////
 
   _self.unload = function () {
+
+    _self.panel.setVisible(false);
+
+
+    _self.panel.uninitialize();
 
     console.log('Viewing.Extension.Workshop unloaded');
 
