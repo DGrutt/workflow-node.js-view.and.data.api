@@ -25,12 +25,39 @@ Viewing.Extension.Workshop = function (viewer, options) {
 
   _self.load = function () {
 
-    alert('Viewing.Extension.Workshop loaded');
+    
+    _viewer.addEventListener(
+    Autodesk.Viewing.SELECTION_CHANGED_EVENT,
+    _self.onSelectionChanged);
+
+
     console.log('Viewing.Extension.Workshop loaded');
 
     return true;
 
   };
+
+  /////////////////////////////////////////////////////////////////
+  // selection changed callback
+  //
+  /////////////////////////////////////////////////////////////////
+  _self.onSelectionChanged = function (event) {
+
+    // event is triggered also when component is unselected
+
+    // in that case event.dbIdArray is an empty array
+    if(event.dbIdArray.length) {
+
+      var dbId = event.dbIdArray[0];
+
+      //do stuff with selected component
+   }
+    else {
+
+
+      //all components unselected
+    }
+  }
 
   /////////////////////////////////////////////////////////////////
   // unload callback: invoked when viewer.unloadExtension is called
